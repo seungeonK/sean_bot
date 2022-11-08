@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start" : "tsc",
+    "compile": "tsc",
+    "start": "node ./built/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.6.0",
+    "dotenv": "^16.0.3",
     "typescript": "^4.8.4"
   },
   "devDependencies": {
