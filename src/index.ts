@@ -35,9 +35,26 @@ commandsFiles.forEach(file => {
     }
 });
 
-client.on(Events.InteractionCreate, (interaction) => {
+/* Client#event:interactionCreate -> execute code when your application receives an interaction */
+client.on(Events.InteractionCreate, async (interaction) => {
+    console.log('interactionCreated in');
+    /* only handles slash commands */
     if (!interaction.isChatInputCommand()) return;
-    console.log(interaction);
+
+    const command = interaction.client.commands.get(interaction.commandName);
+    console.log(`command:${command}`);
+
+    if (!command) {
+        console.error(`No comand matching ${interaction.commandName} was found`);
+        return;
+    }
+
+    try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
 })
 
 // client.once(Events.ClientReady, c => {
