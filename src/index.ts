@@ -18,7 +18,7 @@ class MyClient extends Client implements IMyClient{
 const client = new MyClient({ intents: [GatewayIntentBits.Guilds] });
 
 
-console.log(`%c __dirname: ${__dirname}`, 'background: #222; color: #bada55');
+// console.log(`%c __dirname: ${__dirname}`, 'background: #222; color: #bada55');
 
 const commandsPath = path.join(__dirname, 'commands'); // helps to construct a path to the `commands` directory. ex) /src/commands
 //returns an array of all the file names it contains, ['ping.js', 'server.js']
