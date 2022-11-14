@@ -1,24 +1,17 @@
 import fs from 'node:fs'; // node file system module. 
 import path from 'node:path'; // node native path utility module. 
-import { Client, Events, Collection, GatewayIntentBits, ClientOptions } from 'discord.js';
+import { GatewayIntentBits } from 'discord.js';
+import { MyClient } from './common/types';
+import colors from 'colors';
+
 import { token } from './config.json';
+
+
+colors.enable();
+
+/* Guild: A discord 'server' for end-users */
 // Create a new client instance
-
-interface IMyClient {
-    commands: Collection<string, object>;
-}
-
-class MyClient extends Client implements IMyClient{
-    commands: Collection<string, object>;
-    constructor(options: ClientOptions) {
-        super(options);
-        this.commands = new Collection();
-    }
-}
 const client = new MyClient({ intents: [GatewayIntentBits.Guilds] });
-
-
-// console.log(`%c __dirname: ${__dirname}`, 'background: #222; color: #bada55');
 
 const commandsPath = path.join(__dirname, 'commands'); // helps to construct a path to the `commands` directory. ex) /src/commands
 //returns an array of all the file names it contains, ['ping.js', 'server.js']
@@ -31,38 +24,25 @@ commandsFiles.forEach(file => {
     if ('data' in command && 'execute' in command) {
         client.commands.set(command.data.name, command);
     } else {
-    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`.red);
     }
 });
 
-/* Client#event:interactionCreate -> execute code when your application receives an interaction */
-client.on(Events.InteractionCreate, async (interaction) => {
-    console.log('interactionCreated in');
-    /* only handles slash commands */
-    if (!interaction.isChatInputCommand()) return;
+const eventPath = path.join(__dirname, 'events');
+const eventFiles: string[] = fs.readdirSync(eventPath).filter(file => file.endsWith('.js')); 
 
-    const command = interaction.client.commands.get(interaction.commandName);
-    console.log(`command:${command}`);
-
-    if (!command) {
-        console.error(`No comand matching ${interaction.commandName} was found`);
-        return;
-    }
-
-    try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+for (const file of eventFiles) {
+    const filePath = path.join(eventPath, file); // /src/events/interactionCreate.js
+    // const event = await import(filePath);
+    const event = require(filePath);
+    if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => {
+            event.execute(...args)
+        });
 	}
-})
+}
 
-// client.once(Events.ClientReady, c => {
-//     console.log(typeof c);
-//     console.log(`Ready! Logged in as ${c.user.tag}`);
-// })
-
-
-
-// Log in to Discord with your client's token
+/* Log in to Discord with your client's token */
 client.login(token);
