@@ -1,3 +1,5 @@
+import { InteractionReplyOptions } from "discord.js";
+
 const { SlashCommandBuilder } = require('discord.js');
 
 // A slash command also requires a function to run when the command is used, to respond to the interaction
@@ -9,6 +11,11 @@ module.exports = {
             .setName('ping')
             .setDescription('Replies with Pong!'),
     async execute(interaction) {
-        await interaction.reply('pong');
+        console.dir(interaction);
+        const replyOption: InteractionReplyOptions = {
+            content: `${interaction.user.username} just pinged! Only you can see this message`,
+            ephemeral: true
+        }
+        await interaction.reply(replyOption);
     }
 }
